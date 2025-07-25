@@ -9,6 +9,7 @@
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.5
+ARG RAILS_MASTER_KEY
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -34,38 +35,32 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install Node.js using NodeSource setup script (Node 20.x LTS)
-# This is more robust than manual GPG key/repo setup
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update -qq && apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application Ruby gems
-# Copy Gemfile and Gemfile.lock first to leverage Docker layer caching
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
     rm -rf "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
 # Copy all application code (including assets, config files, package.json etc.)
-# This needs to happen AFTER Ruby gems are installed, but BEFORE npm install
-# and Rails assets:precompile so all necessary files are present.
 COPY . .
 
 # Install JavaScript dependencies (including Tailwind CSS CLI)
-# package.json and package-lock.json are now available because of 'COPY . .'
-# --omit=dev prevents installing development-only dependencies in production
 COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
 # Precompile all production assets (CSS, JavaScript, images etc.)
-# Set SECRET_KEY_BASE directly for this command to avoid linting issues
-# Render automatically injects RAILS_MASTER_KEY as an ENV var into the build.
-RUN SECRET_KEY_BASE=$RAILS_MASTER_KEY bundle exec rails assets:precompile
+# Use a dummy secret key base here to satisfy Rails requirement during build
+RUN SECRET_KEY_BASE=dummy_key bundle exec rails assets:precompile
+
+# Alternative: use real key from build argument if necessary (uncomment below)
+# RUN SECRET_KEY_BASE=${RAILS_MASTER_KEY} bundle exec rails assets:precompile
 
 # Precompile Bootsnap code for faster boot times
-# This can run after assets:precompile, as it's separate Ruby optimization
 RUN bundle exec bootsnap precompile app/ lib/
-
 
 # --- Final Stage for the Production App Image ---
 FROM base
@@ -78,6 +73,7 @@ COPY --from=build /rails /rails
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
+
 USER 1000:1000
 
 # Entrypoint script prepares the database (e.g., runs migrations)
