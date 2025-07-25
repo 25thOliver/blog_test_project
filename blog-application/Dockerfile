@@ -57,16 +57,10 @@ COPY . .
 COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
-# Explicitly set SECRET_KEY_BASE for asset precompilation
-# Rails needs secret_key_base to be available during assets:precompile.
-# Render automatically exposes RAILS_MASTER_KEY from its environment variables
-# as a build argument or environment variable during build.
-ARG RAILS_MASTER_KEY
-ENV SECRET_KEY_BASE=$RAILS_MASTER_KEY
-
 # Precompile all production assets (CSS, JavaScript, images etc.)
-# This runs Tailwind CSS compilation and collects all assets.
-RUN bundle exec rails assets:precompile
+# Set SECRET_KEY_BASE directly for this command to avoid linting issues
+# Render automatically injects RAILS_MASTER_KEY as an ENV var into the build.
+RUN SECRET_KEY_BASE=$RAILS_MASTER_KEY bundle exec rails assets:precompile
 
 # Precompile Bootsnap code for faster boot times
 # This can run after assets:precompile, as it's separate Ruby optimization
