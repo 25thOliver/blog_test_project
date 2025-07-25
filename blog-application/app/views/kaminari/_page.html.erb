@@ -1,0 +1,13 @@
+<li class="page-item <%= "active" if page.current? %>">
+  <% if page.current? %>
+    <span class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-500 text-sm font-medium text-white">
+      <%= page.num %>
+    </span>
+  <% elsif page.gap? %>
+    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+      <%= raw(t 'views.pagination.truncate') %>
+    </span>
+  <% else %>
+    <%= link_to page.num, url_for(page), remote: remote, class: "relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-100" %>
+  <% end %>
+</li>

@@ -1,0 +1,14 @@
+<div class="container mx-auto px-4 my-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Posts</h1>
+    <%= link_to "New Post", new_post_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+  </div>
+
+  <div id="posts" class="space-y-6">
+    <% @posts.each do |post| %>
+      <%= render post %>
+    <% end %>
+  </div>
+
+  <%= paginate @posts %>
+</div>

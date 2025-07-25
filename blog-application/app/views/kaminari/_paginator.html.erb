@@ -1,0 +1,12 @@
+<nav class="flex justify-center mt-8" role="navigation" aria-label="Pagination">
+  <div class="inline-flex rounded-md shadow-sm -space-x-px">
+    <%= first_page_tag unless current_page.first? %>
+    <%= prev_page_tag unless current_page.first? %>
+
+    <%# The each_page loop is intentionally omitted for debugging %>
+
+    <%= next_page_tag unless current_page.last? %>
+    <%= last_page_tag unless current_page.last? %>
+  </div>
+</nav>
+
