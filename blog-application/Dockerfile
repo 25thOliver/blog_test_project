@@ -28,7 +28,7 @@ ENV RAILS_ENV="production" \
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
-# Install packages needed to build gems
+# Install packages needed to build gems and Node.js
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config ca-certificates curl gnupg && \
     mkdir -p /etc/apt/keyrings && \
@@ -38,17 +38,17 @@ RUN apt-get update -qq && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-
 # Install application gems
 COPY Gemfile Gemfile.lock ./\
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache \"${BUNDLE_PATH}\"/ruby/*/bundler/gems/*/.git && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
-# Copy application code (before npm install and asset precompile)
+# Copy application code (including assets and config files)
+# This MUST happen before npm install and assets:precompile
 COPY . .
 
-# Install JavaScript dependencies
+# Install JavaScript dependencies (including Tailwind CSS CLI)
 COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
@@ -59,12 +59,10 @@ RUN bundle exec rails assets:precompile
 RUN bundle exec bootsnap precompile app/ lib/
 
 
-
-
 # Final stage for app image
 FROM base
 
-# Copy built artifacts: gems, application
+# Copy built artifacts: gems, application, and precompiled assets
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
