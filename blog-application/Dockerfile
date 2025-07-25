@@ -38,17 +38,19 @@ RUN apt-get update -qq && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+
 # Install application gems
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile Gemfile.lock ./\
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache \"${BUNDLE_PATH}\"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
-# Install JavaScript dependencies
-COPY package.json package-lock.json ./\nRUN npm install --omit=dev
-
-# Copy application code
+# Copy application code (before npm install and asset precompile)
 COPY . .
+
+# Install JavaScript dependencies
+COPY package.json package-lock.json ./
+RUN npm install --omit=dev
 
 # Precompile all production assets
 RUN bundle exec rails assets:precompile
