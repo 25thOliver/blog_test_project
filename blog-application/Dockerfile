@@ -10,6 +10,7 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.5
 ARG RAILS_MASTER_KEY
+ARG SECRET_KEY_BASE
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
@@ -25,7 +26,7 @@ ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
-    SECRET_KEY_BASE="<your_secret_key_base>"
+    SECRET_KEY_BASE=${SECRET_KEY_BASE}
 
 # --- Build Stage (to reduce final image size) ---
 FROM base AS build
