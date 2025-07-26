@@ -10,8 +10,8 @@ class CommentsController < ApplicationController
         format.html { redirect_to @post, notice: "Comment was successfully created." }
         format.turbo_stream
       else
-        format.html { redirect_to @post, alert: "Failed to create comment." } # Fallback for HTML
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_form", partial: "comments/form", locals: { post: @post, comment: @comment }), status: :unprocessable_entity }
+        format.html { redirect_to @post, alert: "Failed to create comment." }
+        format.turbo_stream { render :form_update, status: :unprocessable_entity }
       end
     end
   end

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
@@ -16,6 +17,7 @@
         <nav>
           <%= link_to "Posts", posts_path, class: "text-gray-600 hover:text-gray-900 px-4" %>
           <%= link_to "New Post", new_post_path, class: "text-gray-600 hover:text-gray-900 px-4" %>
+          <%= link_to "New User", new_user_path, class: "text-gray-600 hover:text-gray-900 px-4" %>
         </nav>
       </div>
     </header>

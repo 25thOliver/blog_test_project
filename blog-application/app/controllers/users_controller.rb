@@ -8,11 +8,9 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        format.html { redirect_to root_path, notice: "User was successfully created. You can now select them when creating posts/comments." }
-        format.json { render :show, status: :created, location: @user }
+        format.html { redirect_to posts_path, notice: "Account created successfully! You can now comment on posts using your name: #{@user.name}" }
       else
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
   end
