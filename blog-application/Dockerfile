@@ -53,7 +53,7 @@ COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 
 # Build Tailwind CSS before Rails asset precompilation
-RUN bundle exec rails tailwindcss:build
+RUN SECRET_KEY_BASE=${RAILS_MASTER_KEY} bundle exec rails tailwindcss:build
 
 # Precompile all production assets (CSS, JavaScript, images etc.)
 # Use a dummy secret key base here to satisfy Rails requirement during build
