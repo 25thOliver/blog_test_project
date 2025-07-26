@@ -54,7 +54,7 @@ RUN npm install --omit=dev
 
 # Precompile all production assets (CSS, JavaScript, images etc.)
 # Use a dummy secret key base here to satisfy Rails requirement during build
-RUN SECRET_KEY_BASE=dummy_key bundle exec rails assets:precompile
+RUN SECRET_KEY_BASE=${RAILS_MASTER_KEY} npx tailwindcss -i ./app/assets/stylesheets/application.css -o ./app/assets/builds/tailwind.css && SECRET_KEY_BASE=${RAILS_MASTER_KEY} bundle exec rails assets:precompile
 
 # Alternative: use real key from build argument if necessary (uncomment below)
 # RUN SECRET_KEY_BASE=${RAILS_MASTER_KEY} bundle exec rails assets:precompile
